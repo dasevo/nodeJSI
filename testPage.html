@@ -11,15 +11,30 @@
                     let obj = JSON.parse(text);
                     document.getElementById("den").innerHTML = obj.denVTydnu;
                     document.getElementById("datum").innerHTML = obj.datumCesky;
+                    document.getElementById("utc").innerHTML = obj.casUTC;
+                    document.getElementById("local").innerHTML = obj.casCesky;
                 });
             });
+        }
+        function cas() {
+            fetch("http://localhost:2000/denvtydnu").then(function (response) {
+                response.text().then(function (text) {
+                    let obj = JSON.parse(text);
+                    document.getElementById("utc").innerHTML = obj.casUTC;
+                    document.getElementById("local").innerHTML = obj.casCesky;
+                });
+            });
+        }
+
+        function updateTime() {
+            setInterval(cas, 1000);
         }
     </script>
 
 </head>
-<body onload="nacteni()">
+<body onload="nacteni(), updateTime()">
 
-Datum: <b id="den"></b> <b id="datum"></b>
+Datum: <b id="den" style="font-size:150%"></b> <b id="datum"></b>
 <br>
 Lokální čas: <b id="local"></b>
 <br>
