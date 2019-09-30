@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Testovací Stránka</title>
+
+    <script>
+        function nacteni() {
+            fetch("http://localhost:2000/denvtydnu").then(function (response) {
+                response.text().then(function (text) {
+                    let obj = JSON.parse(text);
+                    document.getElementById("den").innerHTML = obj.denVTydnu;
+                    document.getElementById("datum").innerHTML = obj.datumCesky;
+                });
+            });
+        }
+    </script>
+
+</head>
+<body onload="nacteni()">
+
+Datum: <b id="den"></b> <b id="datum"></b>
+<br>
+Lokální čas: <b id="local"></b>
+<br>
+Čas UTC: <b id="utc"></b>
+
+
+</body>
+</html>
