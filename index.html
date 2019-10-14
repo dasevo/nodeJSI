@@ -6,6 +6,8 @@
 
     <script>
         function load() {
+            document.getElementById("date").valueAsDate = new Date();
+            calendar();
             fetch("http://localhost:2000/svatky").then(function (response) {
                 response.text().then(function (text) {
                     let obj = JSON.parse(text);
@@ -13,6 +15,16 @@
                     document.getElementById("datum").innerHTML = obj.den + "/" + obj.mesic + "/" + obj.rok;
                     document.getElementById("zitra").innerHTML = obj.zitraDen + "/" + obj.zitraMesic + "/" + obj.zitraRok;
                     document.getElementById("svatekZ").innerHTML = obj.jmenoZitra;
+                });
+            });
+        }
+
+        function calendar() {
+            let d = document.getElementById("date").valueAsDate;
+            fetch("http://localhost:2000/svatky?d=" + d.getDate() + "&m=" + (d.getMonth() + 1)).then(function (response) {
+                response.text().then(function (text) {
+                    let obj = JSON.parse(text);
+                    document.getElementById("name").innerHTML = obj.svatek;
                 });
             });
         }
@@ -25,6 +37,8 @@
 Dnes je <b id="datum">...</b>, svátek má <b id="svatek">...</b>.
 <br>
 Zítra bude <b id="zitra"></b>, svátek bude mít <b id="svatekZ"></b>.
+<br><br>
+<input type="date" id="date" onchange="calendar()"> </input> má svátek <b id="name">...</b>.
 <br><br>
 
 <img src="obrazek.jpg">

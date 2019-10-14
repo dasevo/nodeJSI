@@ -1,6 +1,7 @@
 const http = require("http");
 const dateFormat = require("dateformat");
 const fs = require("fs");
+const url = require("url");
 
 const DNY_V_TYDNU = ["Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"];
 
@@ -48,26 +49,27 @@ function processStaticFiles(res, fileName) {
 }
 
 http.createServer((req, res) => {
-    if (req.url === "/") {
+    let q = url.parse(req.url, true);
+    if (q.pathname === "/") {
         citac++;
         processStaticFiles(res, "/index.html");
         return;
     }
-    if (req.url.length - req.url.lastIndexOf(".") < 6) {
-        processStaticFiles(res, req.url);
+    if (q.pathname.length - q.pathname.lastIndexOf(".") < 6) {
+        processStaticFiles(res, q.pathname);
         return;
     }
-    if (req.url === "/jinastranka") {
+    if (q.pathname === "/jinastranka") {
         res.writeHead(200, {"Content-type": "text/html"});
         res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> jina strana</body></html>");
-    } else if (req.url === "/jsondemo") {
+    } else if (q.pathname === "/jsondemo") {
         res.writeHead(200, {"Content-type": "application/json"});
         let obj = {};
         obj.jmeno = "Vojtech";
         obj.prijmeni = "Dasek";
         obj.rokNarozeni = 2002;
         res.end(JSON.stringify(obj));
-    } else if (req.url === "/denvtydnu") {
+    } else if (q.pathname === "/denvtydnu") {
         res.writeHead(200, {
             "Content-type": "application/json",
             "Access-Control-Allow-Origin": "*"
@@ -82,56 +84,65 @@ http.createServer((req, res) => {
         obj.denVTydnu = DNY_V_TYDNU[obj.cisloDne];
         obj.casUTC = d.getUTCHours() + ":" + d.getUTCMinutes() + ":" + d.getUTCSeconds();
         res.end(JSON.stringify(obj));
-    } else if (req.url === "/svatky") {
+    } else if (q.pathname === "/svatky") {
         res.writeHead(200, {
             "Content-type": "application/json",
             "Access-Control-Allow-Origin": "*"
         });
-        let d = new Date();
+
         let obj = {};
-        obj.den = d.getDate();
-        obj.mesic = d.getMonth() + 1;
-        obj.rok = d.getFullYear();
-        obj.jmeno = SVATKY[obj.mesic][obj.den];
-        obj.zitraRok = obj.rok;
-        let r = obj.rok;
-        let m = obj.mesic;
-        let e = obj.d;
-        let zitraDen = obj.den + 1;
-        let zitraMesic = obj.mesic;
-        if(m==1, m==3, m==5, m==7, m==8, m==10, m==12) {
-            if(e==31) {
-                zitraDen = 1;
-                zitraMesic++;
-            }
-        }
-        if(m==4, m==6, m==9, m==11) {
-            if(e==30) {
-                zitraDen = 1;
-                zitraMesic++;
-            }
-        }
-        if(m==2) {
-            if(r % 4 == 0 && r%100 != 0) {
-                if (e == 29) {
+        if (q.query["m"] && q.query["d"] ) {
+            //obj.datum = `${d}.${m}`
+            let d = q.query["d"];
+            let m = q.query["m"];
+            obj.datum = d + "." + m + ".";
+            obj.svatek = SVATKY[m][d];
+        } else {
+            let d = new Date();
+            obj.den = d.getDate();
+            obj.mesic = d.getMonth() + 1;
+            obj.rok = d.getFullYear();
+            obj.jmeno = SVATKY[obj.mesic][obj.den];
+            obj.zitraRok = obj.rok;
+            let r = obj.rok;
+            let m = obj.mesic;
+            let e = obj.d;
+            let zitraDen = obj.den + 1;
+            let zitraMesic = obj.mesic;
+            if (m == 1, m == 3, m == 5, m == 7, m == 8, m == 10, m == 12) {
+                if (e == 31) {
                     zitraDen = 1;
                     zitraMesic++;
                 }
             }
-            else{
-                if(e==28) {
+            if (m == 4, m == 6, m == 9, m == 11) {
+                if (e == 30) {
                     zitraDen = 1;
                     zitraMesic++;
                 }
             }
+            if (m == 2) {
+                if (r % 4 == 0 && r % 100 != 0) {
+                    if (e == 29) {
+                        zitraDen = 1;
+                        zitraMesic++;
+                    }
+                } else {
+                    if (e == 28) {
+                        zitraDen = 1;
+                        zitraMesic++;
+                    }
+                }
+            }
+            if (zitraMesic == 13) {
+                zitraMesic = 1;
+                obj.zitraRok = obj.rok + 1;
+            }
+            obj.zitraDen = zitraDen;
+            obj.zitraMesic = zitraMesic;
+            obj.jmenoZitra = SVATKY[obj.zitraMesic][obj.zitraDen];
         }
-        if(zitraMesic==13) {
-            zitraMesic = 1;
-            obj.zitraRok = obj.rok + 1;
-        }
-        obj.zitraDen = zitraDen;
-        obj.zitraMesic = zitraMesic;
-        obj.jmenoZitra = SVATKY[obj.zitraMesic][obj.zitraDen];
+
         res.end(JSON.stringify(obj));
     } else {
         res.writeHead(200, {"Content-type": "text/html"});
