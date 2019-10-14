@@ -21,6 +21,7 @@ SVATKY[12] = ["", 'Iva', 'Blanka', 'Svatoslav', 'Barbora', 'Jitka', 'Mikuláš',
 
 
 let citac = 0;
+let msgs = new Array();
 
 function processStaticFiles(res, fileName) {
     fileName = fileName.substr(1);
@@ -91,7 +92,7 @@ http.createServer((req, res) => {
         });
 
         let obj = {};
-        if (q.query["m"] && q.query["d"] ) {
+        if (q.query["m"] && q.query["d"]) {
             //obj.datum = `${d}.${m}`
             let d = q.query["d"];
             let m = q.query["m"];
@@ -144,7 +145,24 @@ http.createServer((req, res) => {
         }
 
         res.end(JSON.stringify(obj));
+    } else if (q.pathname == "/chat/listmsgs") {
+        res.writeHead(200, {
+            "Content-Type": "application/json"
+        });
+        let obj = {};
+        obj.messages = msgs;
+        res.end(JSON.stringify(obj));
+    } else if (q.pathname == "/chat/addmsg") {
+        res.writeHead(200, {
+            "Content-type": "application/json"
+        });
+        let obj = {};
+        obj.text = q.query["msg"];
+        obj.time = new Date();
+        msgs.push(obj);
+        res.end(JSON.stringify(obj));
     } else {
+
         res.writeHead(200, {"Content-type": "text/html"});
         res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> pocet volání: " + citac + "</body></html>");
     }
