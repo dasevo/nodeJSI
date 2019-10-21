@@ -32,7 +32,8 @@
 
         function send() {
             let chatmsg = document.getElementById("chatInput").value;
-            fetch("http://localhost:2000/chat/addmsg?msg=" + chatmsg).then(function (response) {
+            let user = document.getElementById("user").innerHTML;
+            fetch("http://localhost:2000/chat/addmsg?msg=" + chatmsg + "&user=" + user).then(function (response) {
                 response.text().then(function (text) {
 
                 });
@@ -46,11 +47,16 @@
                      let obj = JSON.parse(text);
                      let s = "";
                      for(let o of obj.messages) {
-                         s = s+o.time + "<br>" + o.text + "<br><br>";
+                         s = s+ o.date + " v " + o.time + "<br>" + o.user + ":   <b>" + o.text + "</b><br><br>";
                      }
                      document.getElementById("msgs").innerHTML = s;
                 });
             });
+        }
+
+        function setUser() {
+            document.getElementById("user").innerHTML = document.getElementById("prezdivka").value;
+            document.getElementById("prezdivka").value="";
         }
     </script>
 </head>
@@ -61,15 +67,20 @@
 Dnes je <b id="datum">...</b>, svátek má <b id="svatek">...</b>.
 <br>
 Zítra bude <b id="zitra"></b>, svátek bude mít <b id="svatekZ"></b>.
-<br><br>
-<h1>chat</h1>
-<div id="msgs"></div>
-<input type="text" id="chatInput"><input type="button" value="odesli" onclick="send()">
+
 <br><br>
 <input type="date" id="date" onchange="calendar()"> má svátek <b id="name">...</b>.
 <br><br>
 
 <img src="obrazek.jpg">
+<br><br>
+<br><br>
+<h1>chat</h1>
+<b>Moje přezdívka: </b><i><b id="user"></b></i>
+<br><br>
+<div id="msgs"></div>
+<input type="text" id="chatInput"><input type="button" value="odesli" onclick="send()">
+<input type="text" id="prezdivka" placeholder="přezdívka"><input type="button" value="nastavit" onclick="setUser()">
 
 </body>
 </html>

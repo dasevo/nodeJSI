@@ -1,12 +1,4 @@
-const http = require("http");
-const dateFormat = require("dateformat");
-const fs = require("fs");
 const url = require("url");
-const apiDenVTydnu = require("./api-denvtydnu").apiDenVTydnu;
-const apiSvatky = require("./api-svatky").apiSvatky;
-const apiChat = require("./api-chat").apiChat;
-
-const DNY_V_TYDNU = ["Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"];
 
 const SVATKY = new Array();
 SVATKY[1] = ["", 'Nový rok', 'Karina', 'Radmila', 'Diana', 'Dalimil', 'Tři králové', 'Vilma', 'Čestmír', 'Vladan', 'Břetislav', 'Bohdana', 'Pravoslav', 'Edita', 'Radovan', 'Alice', 'Ctirad', 'Drahoslav', 'Vladislav', 'Doubravka', 'Ilona', 'Běla', 'Slavomír', 'Zdeněk', 'Milena', 'Miloš', 'Zora', 'Ingrid', 'Otýlie', 'Zdislava', 'Robin', 'Marika'];
@@ -22,66 +14,66 @@ SVATKY[10] = ["", 'Igor', 'Olívie a Oliver', 'Bohumil', 'František', 'Eliška'
 SVATKY[11] = ["", 'Felix', 'Památka zesnulých', 'Hubert', 'Karel', 'Miriam', 'Liběna', 'Saskie', 'Bohumír', 'Bohdan', 'Evžen', 'Martin', 'Benedikt', 'Tibor', 'Sáva', 'Leopold', 'Otmar', 'Mahulena', 'Romana', 'Alžběta', 'Nikola', 'Albert', 'Cecílie', 'Klement', 'Emílie', 'Kateřina', 'Artur', 'Xenie', 'René', 'Zina', 'Ondřej'];
 SVATKY[12] = ["", 'Iva', 'Blanka', 'Svatoslav', 'Barbora', 'Jitka', 'Mikuláš', 'Ambrož', 'Květoslava', 'Vratislav', 'Julie', 'Dana', 'Simona', 'Lucie', 'Lýdie', 'Radana', 'Albína', 'Daniel', 'Miloslav', 'Ester', 'Dagmar', 'Natálie', 'Šimon', 'Vlasta', 'Adam a Eva , Štědrý den', '1. svátek vánoční', 'Štěpán , 2. svátek vánoční', 'Žaneta', 'Bohumila', 'Judita', 'David', 'Silvestr'];
 
+exports.apiSvatky = function(req, res) {
+    res.writeHead(200, {
+        "Content-type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+    });
 
-let citac = 0;
-
-
-function processStaticFiles(res, fileName) {
-    fileName = fileName.substr(1);
-    console.log(fileName);
-    let contentType = "text/html";
-
-    if (fileName.endsWith(".png")) {
-        contentType = "image/png";
-    } else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-        //console.log("obrazek");
-        contentType = "image/jpeg";
-    }
-
-    console.log(contentType);
-
-    if (fs.existsSync(fileName)) {
-        fs.readFile(fileName, function (err, data) {
-            res.writeHead(200, {'Content-Type': contentType});
-            res.write(data);
-            res.end();
-        });
-    } else {
-        res.writeHead(404);
-        res.end();
-    }
-}
-
-http.createServer((req, res) => {
     let q = url.parse(req.url, true);
-    if (q.pathname === "/") {
-        citac++;
-        processStaticFiles(res, "/index.html");
-        return;
-    }
-    if (q.pathname.length - q.pathname.lastIndexOf(".") < 6) {
-        processStaticFiles(res, q.pathname);
-        return;
-    }
-    if (q.pathname === "/jinastranka") {
-        res.writeHead(200, {"Content-type": "text/html", "Access-Control-Allow-Origin": "*"});
-        res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> jina strana</body></html>");
-    } else if (q.pathname === "/jsondemo") {
-        res.writeHead(200, {"Content-type": "application/json", "Access-Control-Allow-Origin": "*"});
-        let obj = {};
-        obj.jmeno = "Vojtech";
-        obj.prijmeni = "Dasek";
-        obj.rokNarozeni = 2002;
-        res.end(JSON.stringify(obj));
-    } else if (q.pathname === "/denvtydnu") {
-        apiDenVTydnu(req, res);
-    } else if (q.pathname === "/svatky") {
-        apiSvatky(req, res);
-    } else if (q.pathname.startsWith("/chat/")) {
-        apiChat(req, res);
-    } else {
 
-        res.writeHead(200, {"Content-type": "text/html", "Access-Control-Allow-Origin": "*"});
-        res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> pocet volání: " + citac + "</body></html>");
+    let obj = {};
+    if (q.query["m"] && q.query["d"]) {
+        //obj.datum = `${d}.${m}`
+        let d = q.query["d"];
+        let m = q.query["m"];
+        obj.datum = d + "." + m + ".";
+        obj.svatek = SVATKY[m][d];
+    } else {
+        let d = new Date();
+        obj.den = d.getDate();
+        obj.mesic = d.getMonth() + 1;
+        obj.rok = d.getFullYear();
+        obj.jmeno = SVATKY[obj.mesic][obj.den];
+        obj.zitraRok = obj.rok;
+        let r = obj.rok;
+        let m = obj.mesic;
+        let e = obj.d;
+        let zitraDen = obj.den + 1;
+        let zitraMesic = obj.mesic;
+        if (m == 1, m == 3, m == 5, m == 7, m == 8, m == 10, m == 12) {
+            if (e == 31) {
+                zitraDen = 1;
+                zitraMesic++;
+            }
+        }
+        if (m == 4, m == 6, m == 9, m == 11) {
+            if (e == 30) {
+                zitraDen = 1;
+                zitraMesic++;
+            }
+        }
+        if (m == 2) {
+            if (r % 4 == 0 && r % 100 != 0) {
+                if (e == 29) {
+                    zitraDen = 1;
+                    zitraMesic++;
+                }
+            } else {
+                if (e == 28) {
+                    zitraDen = 1;
+                    zitraMesic++;
+                }
+            }
+        }
+        if (zitraMesic == 13) {
+            zitraMesic = 1;
+            obj.zitraRok = obj.rok + 1;
+        }
+        obj.zitraDen = zitraDen;
+        obj.zitraMesic = zitraMesic;
+        obj.jmenoZitra = SVATKY[obj.zitraMesic][obj.zitraDen];
     }
-}).listen(2000);
+
+    res.end(JSON.stringify(obj));
+}
