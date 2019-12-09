@@ -5,11 +5,13 @@
     <title>Home</title>
 
     <script>
+        const HOST = window.location.protocol + "//" + window.location.hostname + ((window.location.port) ? ":" + window.location.port : "");
+
         function load() {
             setInterval(listMsgs, 1000);
             document.getElementById("date").valueAsDate = new Date();
             calendar();
-            fetch("http://localhost:2000/svatky").then(function (response) {
+            fetch(HOST + "/svatky").then(function (response) {
                 response.text().then(function (text) {
                     let obj = JSON.parse(text);
                     document.getElementById("svatek").innerHTML = obj.jmeno;
@@ -22,7 +24,7 @@
 
         function calendar() {
             let d = document.getElementById("date").valueAsDate;
-            fetch("http://localhost:2000/svatky?d=" + d.getDate() + "&m=" + (d.getMonth() + 1)).then(function (response) {
+            fetch(HOST + "/svatky?d=" + d.getDate() + "&m=" + (d.getMonth() + 1)).then(function (response) {
                 response.text().then(function (text) {
                     let obj = JSON.parse(text);
                     document.getElementById("name").innerHTML = obj.svatek;
@@ -33,7 +35,13 @@
         function send() {
             let chatmsg = document.getElementById("chatInput").value;
             let user = document.getElementById("user").innerHTML;
-            fetch("http://localhost:2000/chat/addmsg?msg=" + chatmsg + "&user=" + user).then(function (response) {
+            let body = {};
+            body.msg = chatmsg;
+            body.usr = user;
+            let options = {};
+            options.method = "POST";
+            options.body = JSON.stringify(body);
+            fetch(HOST + "/chat/addmsg?msg=", options).then(function (response) {
                 response.text().then(function (text) {
 
                 });
@@ -42,7 +50,7 @@
         }
 
         function listMsgs() {
-            fetch("http://localhost:2000/chat/listmsgs").then(function (response) {
+            fetch(HOST + "/chat/listmsgs").then(function (response) {
                 response.text().then(function (text) {
                      let obj = JSON.parse(text);
                      let s = "";

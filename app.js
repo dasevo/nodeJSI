@@ -23,6 +23,7 @@ SVATKY[11] = ["", 'Felix', 'Památka zesnulých', 'Hubert', 'Karel', 'Miriam', '
 SVATKY[12] = ["", 'Iva', 'Blanka', 'Svatoslav', 'Barbora', 'Jitka', 'Mikuláš', 'Ambrož', 'Květoslava', 'Vratislav', 'Julie', 'Dana', 'Simona', 'Lucie', 'Lýdie', 'Radana', 'Albína', 'Daniel', 'Miloslav', 'Ester', 'Dagmar', 'Natálie', 'Šimon', 'Vlasta', 'Adam a Eva , Štědrý den', '1. svátek vánoční', 'Štěpán , 2. svátek vánoční', 'Žaneta', 'Bohumila', 'Judita', 'David', 'Silvestr'];
 
 
+
 let citac = 0;
 
 
@@ -64,10 +65,10 @@ http.createServer((req, res) => {
         return;
     }
     if (q.pathname === "/jinastranka") {
-        res.writeHead(200, {"Content-type": "text/html", "Access-Control-Allow-Origin": "*"});
+        res.writeHead(200, {"Content-type": "text/html"});
         res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> jina strana</body></html>");
     } else if (q.pathname === "/jsondemo") {
-        res.writeHead(200, {"Content-type": "application/json", "Access-Control-Allow-Origin": "*"});
+        res.writeHead(200, {"Content-type": "application/json"});
         let obj = {};
         obj.jmeno = "Vojtech";
         obj.prijmeni = "Dasek";
@@ -80,8 +81,8 @@ http.createServer((req, res) => {
     } else if (q.pathname.startsWith("/chat/")) {
         apiChat(req, res);
     } else {
-
-        res.writeHead(200, {"Content-type": "text/html", "Access-Control-Allow-Origin": "*"});
+        processStaticFiles("/index.html");
+        res.writeHead(200, {"Content-type": "text/html"});
         res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> pocet volání: " + citac + "</body></html>");
     }
-}).listen(2000);
+}).listen(8080);

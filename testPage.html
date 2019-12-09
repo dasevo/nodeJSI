@@ -5,8 +5,11 @@
     <title>Testovací Stránka</title>
 
     <script>
+
+        const HOST = window.location.protocol + "//" + window.location.hostname + ((window.location.port) ? ":" + window.location.port : "");
+
         function nacteni() {
-            fetch("http://localhost:2000/denvtydnu").then(function (response) {
+            fetch(HOST + "/denvtydnu").then(function (response) {
                 response.text().then(function (text) {
                     let obj = JSON.parse(text);
                     document.getElementById("den").innerHTML = obj.denVTydnu;
@@ -18,7 +21,7 @@
         }
 
         function cas() {
-            fetch("http://localhost:2000/denvtydnu").then(function (response) {
+            fetch(HOST + "/denvtydnu").then(function (response) {
                 response.text().then(function (text) {
                     let obj = JSON.parse(text);
                     document.getElementById("utc").innerHTML = obj.casUTC;

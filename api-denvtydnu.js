@@ -4,7 +4,6 @@ const dateFormat = require("dateformat");
 exports.apiDenVTydnu = function (req, res) {
     res.writeHead(200, {
         "Content-type": "application/json",
-        "Access-Control-Allow-Origin": "*"
     });
     let d = new Date();
     let obj = {};
