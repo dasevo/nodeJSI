@@ -9,9 +9,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "crypto": "^1.0.1",
     "dateformat": "^3.0.3",
+    "fs": "0.0.1-security",
+    "html": "^1.0.0",
     "html-entities": "^1.2.1",
     "localtunnel": "^2.0.0",
+    "spaserver": "git+https://github.com/liborsvejda/spaserver.git",
     "url": "^0.11.0"
   },
   "devDependencies": {},

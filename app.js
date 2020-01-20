@@ -5,8 +5,12 @@ const url = require("url");
 const apiDenVTydnu = require("./api-denvtydnu").apiDenVTydnu;
 const apiSvatky = require("./api-svatky").apiSvatky;
 const apiChat = require("./api-chat").apiChat;
+const apiUser = require("./api-user").apiUser;
+const createSpaServer = require("spaserver").createSpaServer;
+
 
 const DNY_V_TYDNU = ["Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"];
+const PORT = 8080;
 
 const SVATKY = new Array();
 SVATKY[1] = ["", 'Nový rok', 'Karina', 'Radmila', 'Diana', 'Dalimil', 'Tři králové', 'Vilma', 'Čestmír', 'Vladan', 'Břetislav', 'Bohdana', 'Pravoslav', 'Edita', 'Radovan', 'Alice', 'Ctirad', 'Drahoslav', 'Vladislav', 'Doubravka', 'Ilona', 'Běla', 'Slavomír', 'Zdeněk', 'Milena', 'Miloš', 'Zora', 'Ingrid', 'Otýlie', 'Zdislava', 'Robin', 'Marika'];
@@ -22,67 +26,32 @@ SVATKY[10] = ["", 'Igor', 'Olívie a Oliver', 'Bohumil', 'František', 'Eliška'
 SVATKY[11] = ["", 'Felix', 'Památka zesnulých', 'Hubert', 'Karel', 'Miriam', 'Liběna', 'Saskie', 'Bohumír', 'Bohdan', 'Evžen', 'Martin', 'Benedikt', 'Tibor', 'Sáva', 'Leopold', 'Otmar', 'Mahulena', 'Romana', 'Alžběta', 'Nikola', 'Albert', 'Cecílie', 'Klement', 'Emílie', 'Kateřina', 'Artur', 'Xenie', 'René', 'Zina', 'Ondřej'];
 SVATKY[12] = ["", 'Iva', 'Blanka', 'Svatoslav', 'Barbora', 'Jitka', 'Mikuláš', 'Ambrož', 'Květoslava', 'Vratislav', 'Julie', 'Dana', 'Simona', 'Lucie', 'Lýdie', 'Radana', 'Albína', 'Daniel', 'Miloslav', 'Ester', 'Dagmar', 'Natálie', 'Šimon', 'Vlasta', 'Adam a Eva , Štědrý den', '1. svátek vánoční', 'Štěpán , 2. svátek vánoční', 'Žaneta', 'Bohumila', 'Judita', 'David', 'Silvestr'];
 
-
-
 let citac = 0;
 
-
-function processStaticFiles(res, fileName) {
-    fileName = fileName.substr(1);
-    console.log(fileName);
-    let contentType = "text/html";
-
-    if (fileName.endsWith(".png")) {
-        contentType = "image/png";
-    } else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-        //console.log("obrazek");
-        contentType = "image/jpeg";
-    }
-
-    console.log(contentType);
-
-    if (fs.existsSync(fileName)) {
-        fs.readFile(fileName, function (err, data) {
-            res.writeHead(200, {'Content-Type': contentType});
-            res.write(data);
-            res.end();
-        });
-    } else {
-        res.writeHead(404);
-        res.end();
-    }
-}
-
-http.createServer((req, res) => {
-    let q = url.parse(req.url, true);
-    if (q.pathname === "/") {
-        citac++;
-        processStaticFiles(res, "/index.html");
-        return;
-    }
-    if (q.pathname.length - q.pathname.lastIndexOf(".") < 6) {
-        processStaticFiles(res, q.pathname);
-        return;
-    }
-    if (q.pathname === "/jinastranka") {
+function processApi(req, res) {
+    if (req.pathname === "/jinastranka") {
         res.writeHead(200, {"Content-type": "text/html"});
         res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> jina strana</body></html>");
-    } else if (q.pathname === "/jsondemo") {
+    } else if (req.pathname === "/jsondemo") {
         res.writeHead(200, {"Content-type": "application/json"});
         let obj = {};
         obj.jmeno = "Vojtech";
         obj.prijmeni = "Dasek";
         obj.rokNarozeni = 2002;
         res.end(JSON.stringify(obj));
-    } else if (q.pathname === "/denvtydnu") {
+    } else if (req.pathname === "/denvtydnu") {
         apiDenVTydnu(req, res);
-    } else if (q.pathname === "/svatky") {
+    } else if (req.pathname === "/svatky") {
         apiSvatky(req, res);
-    } else if (q.pathname.startsWith("/chat/")) {
+    } else if (req.pathname.startsWith("/chat/")) {
         apiChat(req, res);
+    } else if (req.pathname.startsWith("/user/")) {
+        apiUser(req, res);
     } else {
-        processStaticFiles("/index.html");
+        //processStaticFiles("/index.html");
         res.writeHead(200, {"Content-type": "text/html"});
         res.end("<html lang='cs'><head><meta charset='UTF-8'></head><body> pocet volání: " + citac + "</body></html>");
     }
-}).listen(8080);
+}
+
+createSpaServer(PORT, processApi);

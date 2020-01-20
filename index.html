@@ -6,6 +6,73 @@
 
     <script>
         const HOST = window.location.protocol + "//" + window.location.hostname + ((window.location.port) ? ":" + window.location.port : "");
+        let userLogin = "";
+
+        function logout() {
+            document.getElementById("logreg").style = "display: block";
+            document.getElementById("page").style = "display: none";
+        }
+
+        function login() {
+            let login = document.getElementById("loginL").value;
+            userLogin = login;
+            let password = document.getElementById("passL").value;
+            let body = {};
+            body.login = login;
+            body.pass = password;
+            let options = {};
+            options.method = "POST";
+            options.body = JSON.stringify(body);
+            fetch(HOST + "/user/checkuser?user=", options).then(function (response) {
+                response.text().then(function (text) {
+                    let obj = JSON.parse(text);
+                    if(obj.response) {
+                        document.getElementById("logreg").style = "display: none";
+                        document.getElementById("page").style = "display: block";
+                    } else if(obj.error === "hesla se neshoduji") {
+                        window.alert("nespravne heslo");
+                    } else if(obj.error === "uzivatel neexistuje") {
+                        window.alert("tento uzivatel neexistuje");
+                    }
+                });
+            });
+        }
+
+        function register() {
+            let name = document.getElementById("nameR").value;
+            let login = document.getElementById("login").value;
+            let pass1 = document.getElementById("pass1").value;
+            let pass2 = document.getElementById("pass2").value;
+            let email = document.getElementById("email").value;
+
+            let body = {};
+            body.login = login;
+            body.pass = pass1;
+            body.name = name;
+            body.email = email;
+            let options = {};
+            options.method = "POST";
+            options.body = JSON.stringify(body);
+            if(pass1 === pass2) {
+                fetch(HOST + "/user/adduser?user=", options).then(function (response) {
+                    response.text().then(function (text) {
+                        let obj = JSON.stringify(text);
+                        if(obj.error === "user exists") {
+                            window.alert("uzivatel jiz existuje");
+                        } else {
+                            window.alert("uspesne registrovano");
+                            document.getElementById("email").value = "";
+                            document.getElementById("pass2").value = "";
+                            document.getElementById("pass1").value = "";
+                            document.getElementById("login").value = "";
+                            document.getElementById("nameR").value = "";
+                        }
+                    });
+                });
+            } else {
+                window.alert("hesla se neshoduji");
+            }
+        }
 
         function load() {
             setInterval(listMsgs, 1000);
@@ -34,10 +101,10 @@
 
         function send() {
             let chatmsg = document.getElementById("chatInput").value;
-            let user = document.getElementById("user").innerHTML;
+            let user = userLogin;
             let body = {};
             body.msg = chatmsg;
-            body.usr = user;
+            body.usr = userLogin;
             let options = {};
             options.method = "POST";
             options.body = JSON.stringify(body);
@@ -70,8 +137,23 @@
 </head>
 <body onload="load()">
 
+<div id="logreg" style="display:block">
+    <h3>Prihlasit se</h3>
+    <label>login: </label><input type="text" id="loginL"><br>
+    <label>heslo: </label><input type="password" id="passL"><br>
+    <input type="button" value="prihlasit" onclick="login()">
+    <h3>Registrovat se</h3>
+    <label>jmeno: </label><input type="text" id="nameR"><br>
+    <label>login: </label><input type="text" id="login"><br>
+    <label>heslo: </label><input type="password" id="pass1"><br>
+    <label>heslo znovu: </label><input type="password" id="pass2"><br>
+    <label>email: </label><input type="email" id="email"><br>
+    <input type="button" value="registrovat" onclick="register()"><br>
+    <label id="success"></label>
+</div>
+<div id="page" style="display:none">
 <h1>aplikace</h1>
-
+<input type="button" value="odhlásit" onclick="logout()">
 Dnes je <b id="datum">...</b>, svátek má <b id="svatek">...</b>.
 <br>
 Zítra bude <b id="zitra"></b>, svátek bude mít <b id="svatekZ"></b>.
@@ -84,11 +166,11 @@ Zítra bude <b id="zitra"></b>, svátek bude mít <b id="svatekZ"></b>.
 <br><br>
 <br><br>
 <h1>chat</h1>
+<br>
 <b>Moje přezdívka: </b><i><b id="user"></b></i>
 <br><br>
 <div id="msgs"></div>
 <input type="text" id="chatInput"><input type="button" value="odesli" onclick="send()">
-<input type="text" id="prezdivka" placeholder="přezdívka"><input type="button" value="nastavit" onclick="setUser()">
-
+</div>
 </body>
 </html>
